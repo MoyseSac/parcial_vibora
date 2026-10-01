@@ -96,3 +96,23 @@ git worktree add ../vib-racha         -b feature/racha
 Regla de integración: si una manzana es dorada y además llega en racha, los multiplicadores
 se multiplican (x6). Ojo: "pasos" son invocaciones de `paso()`, no milisegundos — así que
 el contador de la racha se avanza en el mismo `paso()` que la colisión.
+
+## Integración: choques ya analizados
+
+Las tres ramas nacen del mismo commit y no hay `.gitattributes`: git fusiona por defecto
+y todo conflicto se resuelve a mano.
+
+- `feature/borrar-record` es ortogonal: inserta un botón entre `</dl>` y
+  `<section class="controles">` (`index.html:64-66`) y un listener en la sección
+  "mandos" de `game.js`. Mézclala primero o última, da igual.
+- `feature/manzana-dorada` y `feature/racha` **colisionan en `paso()`**
+  (`game.js:140-163`): ambas necesitan la condición de colisión (`:154`),
+  `puntos += 10 * nivel` (`:157`) y `comida = celdaLibre()` (`:159`). Constantes
+  (`:8-16`) y estado (`:77-80`) también se tocan, pero son choques mecánicos.
+- **El peligro no lo marca git**: cada rama dejará la línea de puntos en `* 3` o en
+  `* 2`; integradas como dos merges secuenciales, la segunda pisa la primera y el árbol
+  queda limpio pero puntúa mal. Integra dorada + racha **en un solo commit manual** con
+  multiplicadores explícitos (`puntos += 10 * nivel * multiplicador`), sin alterar el
+  orden existente nivel→puntos.
+- Verificación post-merge, jugando: la 7ª manzana sola (x3), dos seguidas (x2) y la 7ª
+  en racha (x6).
